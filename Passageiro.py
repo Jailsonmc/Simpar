@@ -1,8 +1,11 @@
 import datetime
 import pytz
 from time import gmtime, strftime
+from pythonds.basic import Queue
+import time
 
-from pythonds.basic import queue
+def tempo_atual():
+    return strftime("%Y-%m-%d %H:%M:%S", gmtime())
 
 class Passageiro:
 
@@ -23,22 +26,52 @@ class Passageiro:
 
 class Balcao:
 
-    def __init__(self, n_balcao, fila, inic_atend, passt_atend, numt_bag, tempt_esp, bag_utemp):
+    def __init__(self, n_balcao, tempt_esp, bag_utemp):
         self.__n_balcao = n_balcao
-        self.__fila = fila
-        self.__inic_atend = inic_atend
-        self.__passt_atend = passt_atend
-        self.__numt_bag = numt_bag
+        self.__fila = Queue()
+        self.__inic_atend = 0
+        self.__passt_atend = 0
+        self.__numt_bag = 0
         self.__tempt_esp = tempt_esp
         self.__bag_utemp = bag_utemp
 
-    def muda_inic_atend(self, inic_atend_pass):
-        self.__inic_atend = inic_atend_pass
+    def muda_inic_atend(self, passageiro):
+        self.__inic_atend = passageiro.ciclo_in()
+        self.incr_passt_atend()
+        self.muda_numt_bag(passageiro.obtem_bag_pass())
+        print(tempo_atual())
+        print(passageiro.ciclo_in())
+        print(tempo_atual() - passageiro.ciclo_in())
+
+
+    def incr_passt_atend(self):
+        self.__passt_atend += 1
+
+    def muda_numt_bag(self, bag_passageiro):
+        self.__numt_bag += bag_passageiro
+
+
 
 if __name__ == '__main__' :
 
-    pass1 = Passageiro(4, strftime("%Y-%m-%d_%H:%M:%S", gmtime()))
+    balcao1 = Balcao("1", "10", "20")
 
-    print("Teste")
-    print(pass1)
+    pass1 = Passageiro(4, tempo_atual())
+    time.sleep(2)
+    pass2 = Passageiro(2, tempo_atual())
+
+    fila = Queue()
+
+    print(int(time.time()))
+
+    fila.enqueue(pass1)
+    fila.enqueue(pass2)
+
+    print(fila)
+    balcao1.muda_inic_atend(fila.dequeue())
+    print(fila)
+    balcao1.muda_inic_atend(fila.dequeue())
+
+    print(fila)
+
 
