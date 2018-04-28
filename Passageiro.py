@@ -25,5 +25,6 @@ if __name__ == '__main__' :
 
     pass1 = Passageiro(4, strftime("%Y-%m-%d_%H:%M:%S", gmtime()))
 
+    print("Teste")
     print(pass1)
 
