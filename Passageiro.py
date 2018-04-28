@@ -74,4 +74,9 @@ if __name__ == '__main__' :
 
     print(fila)
 
+<<<<<<< HEAD
 
+=======
+    print("Teste")
+    print(pass1)
+>>>>>>> da143c9a3860a817ebd76868334d0b82cfff6626
