@@ -5,7 +5,11 @@ from pythonds.basic import Queue
 import time
 
 def tempo_atual():
-    return strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    return time.time()
+    #return strftime("%Y-%m-%d %H:%M:%S", gmtime())
+
+def unix_para_datetime(tempo_unix):
+    return datetime.datetime.fromtimestamp(int(tempo_unix)).strftime("%Y-%m-%d %H:%M:%S")
 
 class Passageiro:
 
@@ -39,6 +43,7 @@ class Balcao:
         self.__inic_atend = passageiro.ciclo_in()
         self.incr_passt_atend()
         self.muda_numt_bag(passageiro.obtem_bag_pass())
+        
         print(tempo_atual())
         print(passageiro.ciclo_in())
         print(tempo_atual() - passageiro.ciclo_in())
@@ -74,9 +79,9 @@ if __name__ == '__main__' :
 
     print(fila)
 
-<<<<<<< HEAD
+#<<<<<<< HEAD
 
-=======
+#=======
     print("Teste")
     print(pass1)
->>>>>>> da143c9a3860a817ebd76868334d0b82cfff6626
+#>>>>>>> da143c9a3860a817ebd76868334d0b82cfff6626
