@@ -1,8 +1,9 @@
-import datetime
 import pytz
 from time import gmtime, strftime
+import datetime
 from pythonds.basic import Queue
 import time
+from random import  randint
 
 def tempo_atual():
     return time.time()
@@ -30,24 +31,25 @@ class Passageiro:
 
 class Balcao:
 
-    def __init__(self, n_balcao, tempt_esp, bag_utemp):
+    def __init__(self, n_balcao):
         self.__n_balcao = n_balcao
         self.__fila = Queue()
         self.__inic_atend = 0
         self.__passt_atend = 0
         self.__numt_bag = 0
-        self.__tempt_esp = tempt_esp
-        self.__bag_utemp = bag_utemp
+        self.__tempt_esp = 0
+        self.__bag_utemp = 0
 
     def muda_inic_atend(self, passageiro):
         self.__inic_atend = passageiro.ciclo_in()
         self.incr_passt_atend()
         self.muda_numt_bag(passageiro.obtem_bag_pass())
+        self.__tempt_esp += (tempo_atual() - passageiro.ciclo_in())
+        self.__bag_utemp = self.__numt_bag
 
-        print(tempo_atual())
-        print(passageiro.ciclo_in())
-        print(tempo_atual() - passageiro.ciclo_in())
-
+        #print("Tempo Atual: " + str(int(tempo_atual())))
+        #print("Ciclo in passageiro: " + str(int(passageiro.ciclo_in())))
+        #print("Tempo atual - tempo do passageiro: " + str(int(tempo_atual() - passageiro.ciclo_in())))
 
     def incr_passt_atend(self):
         self.__passt_atend += 1
@@ -55,29 +57,45 @@ class Balcao:
     def muda_numt_bag(self, bag_passageiro):
         self.__numt_bag += bag_passageiro
 
+    def obtem_n_balcao(self):
+        return self.__n_balcao
 
+    def obtem_fila(self):
+        return self.__fila
+
+    def obtem_inic_atend(self):
+        return self.__inic_atend
+
+    def obtem_passt_atend(self):
+        return self.__passt_atend
+
+    def obtem_numt_bag(self):
+        return self.__numt_bag
+
+    def obtem_temp_esp(self):
+        return self.__tempt_esp
+
+    def obtem_bag_utemp(self):
+        return self.__bag_utemp
 
 if __name__ == '__main__' :
 
-    balcao1 = Balcao("1", "10", "20")
+    balcao1 = Balcao("1")
+    lista_passageiros = []
 
-    pass1 = Passageiro(4, tempo_atual())
-    time.sleep(2)
-    pass2 = Passageiro(2, tempo_atual())
+    for i in range(10):
+        lista_passageiros.append(Passageiro(randint(0,5), tempo_atual()))
+        print("Criado passageiro " + str(i+1) + "")
+        time.sleep(randint(2,9))
 
     fila = Queue()
 
-    print(int(time.time()))
+    for i in range(len(lista_passageiros)):
+        fila.enqueue(lista_passageiros[i])
 
-    fila.enqueue(pass1)
-    fila.enqueue(pass2)
+    while not fila.isEmpty():
+        balcao1.muda_inic_atend(fila.dequeue())
 
-    print(fila)
-    balcao1.muda_inic_atend(fila.dequeue())
-    print(fila)
-    balcao1.muda_inic_atend(fila.dequeue())
-
-    print(fila)
-
-    print(pass1)
+    print("Tempo total de espera do balcao: "+str(int(balcao1.obtem_temp_esp())))
+    print("Total de bagagens despachadas pelo balcao atual é: "+ str(balcao1.obtem_numt_bag()))
 
