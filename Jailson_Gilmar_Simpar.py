@@ -33,7 +33,7 @@ class Balcao:
 
     def __init__(self, n_balcao):
         self.__n_balcao = n_balcao
-        self.__fila = Queue()
+        self.fila = Queue()
         self.__inic_atend = 0
         self.__passt_atend = 0
         self.__numt_bag = 0
@@ -83,19 +83,19 @@ if __name__ == '__main__' :
     balcao1 = Balcao("1")
     lista_passageiros = []
 
-    for i in range(10):
+    for i in range(1):
         lista_passageiros.append(Passageiro(randint(0,5), tempo_atual()))
         print("Criado passageiro " + str(i+1) + "")
         time.sleep(randint(2,9))
 
-    fila = Queue()
-
     for i in range(len(lista_passageiros)):
-        fila.enqueue(lista_passageiros[i])
+        balcao1.fila.enqueue(lista_passageiros[i])
 
-    while not fila.isEmpty():
-        balcao1.muda_inic_atend(fila.dequeue())
+    while not balcao1.fila.isEmpty():
+        balcao1.muda_inic_atend(balcao1.fila.dequeue())
 
     print("Tempo total de espera do balcao: "+str(int(balcao1.obtem_temp_esp())))
     print("Total de bagagens despachadas pelo balcao atual é: "+ str(balcao1.obtem_numt_bag()))
 
+    print(datetime.date(1989,12,21))
+    print(" .. \n ..")
