@@ -24,7 +24,10 @@ class Professor(Contacto):
 
 if __name__ == '__main__':
 
-    notas = [ 3, 5, 12, 19]
+    notas = [ 3, 5, 12, 1, 19 ,2]
+
+    print(min(notas))
+    print(notas.index(min(notas)))
 
     aluno = Aluno("12312", "Automação Industrial", "2012", "D", notas, "Jailson", "jailsonmc@gmail.com", "123 432 432", "1964-12-12")
 
