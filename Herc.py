@@ -28,4 +28,4 @@ if __name__ == '__main__':
 
     aluno = Aluno("12312", "Automação Industrial", "2012", "D", notas, "Jailson", "jailsonmc@gmail.com", "123 432 432", "1964-12-12")
 
-    print(aluno.aniversario)
+    print(aluno.nome)
