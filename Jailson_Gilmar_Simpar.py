@@ -126,10 +126,10 @@ def mostra_balcoes(balcoes):
 def apresenta_resultados(balcoes):
     for balcao in balcoes:
         if balcao.obtem_passt_atend() > 0:
-            print("Balcão " + balcao.obtem_n_balcao() + " despachou " + balcao.obtem_bag_utemp() + " bagagens por ciclo:")
+            print("Balcão " + str(balcao.obtem_n_balcao()) + " despachou " + str(balcao.obtem_bag_utemp()) + " bagagens por ciclo:")
             media_bag_pass = balcao.obtem_numt_bag()/balcao.obtem_bag_utemp()
-            print(balcao.obtem_passt_atend() + " passageiros atendidos com média de bagagens / passageiro = " + media_bag_pass)
-            print("Tempo médio de espera = " + balcao.obtem_passt_atend())
+            print(str(balcao.obtem_passt_atend()) + " passageiros atendidos com média de bagagens / passageiro = " + str(media_bag_pass))
+            print("Tempo médio de espera = " + str(balcao.obtem_passt_atend()))
 
 def existem_balcoes_com_fila(balcoes):
     for balcao in balcoes:
@@ -139,13 +139,14 @@ def existem_balcoes_com_fila(balcoes):
 
 def simpar_simula():
     global num_pass, num_bag, num_balcoes, ciclos, n_p_atend, fila_de_espera
+    # Cria os balcões
     balcoes = []
     for i in range(num_balcoes):
         balcoes.append(Balcao( i+1 , num_bag ))
 
     for i in range(n_p_atend):
         for balcao in balcoes:
-            if num_pass > 0:
+            if fila_de_espera > 0:
                 balcao.obtem_fila().enqueue((Passageiro(randint(1,num_bag), 1 )))
                 fila_de_espera -= 1
 
@@ -155,11 +156,28 @@ def simpar_simula():
         print("««« CICLO n.º " + str(i) + " »»»")
         for j in range(n_p_atend):
             atende_passageiros(i, balcoes)
-        #print("Fechou a chegada de novos passageiros")
-        #ciclos += 1
-        #while existem_balcoes_com_fila(balcoes):
-        #    print("««« CICLO n.º " + str(i) + " »»»")
-        #    atende_passageiros(i, balcoes, ciclos, num_bag)
+    #apresenta_resultados(balcoes)
+    print("Fechou a chegada de novos passageiros")
+    ciclos += 1
+
+    #print("Há "+str(fila_de_espera) + " passageiros restantes na fila de espera.")
+    #mostra_balcoes(balcoes)
+    while fila_de_espera > 0:
+        print("««« CICLO n.º " + str(ciclos) + " »»»")
+        ciclos += 1
+        for i in range(n_p_atend):
+            for balcao in balcoes:
+                if fila_de_espera > 0:
+                    balcao.obtem_fila().enqueue((Passageiro(randint(1,num_bag), 1 )))
+                    fila_de_espera -= 1
+        apresenta_resultados(balcoes)
+
+
+    print("Há "+str(fila_de_espera) + " passageiros restantes na fila de espera.")
+    #mostra_balcoes(balcoes)
+    #while existem_balcoes_com_fila(balcoes):
+    #    print("««« CICLO n.º " + str(i) + " »»»")
+    #    atende_passageiros(i, balcoes, ciclos, num_bag)
     #apresenta_resultados(balcoes)
     #num_pass -= 1
     #apresenta_resultados(balcoes)
