@@ -50,8 +50,7 @@ class Balcao:
     def __str__(self):
         if not self.obtem_fila().isEmpty():
             lista_aux = self.obtem_fila()
-            passageiro = lista_aux.dequeue()
-            return "Balcão " + str(self.obtem_n_balcao()) + " tempo " + str(passageiro.obtem_ciclo_in()) + " : " + " - " + lista_aux.size()*str(passageiro) + " - "
+            return "Balcão " + str(self.obtem_n_balcao()) + " tempo " + str(self.obtem_inic_atend()) + " : " + " - " + lista_aux.size()*str(lista_aux.dequeue()) + " - "
         else:
             return "Balcão " + str(self.obtem_n_balcao()) + " tempo " + str(self.obtem_inic_atend()) + " : " + " - "
 
