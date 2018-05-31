@@ -5,17 +5,11 @@ from pythonds.basic import Queue
 import time
 from random import  randint
 
-def tempo_atual():
-    return time.time()
-    #return strftime("%Y-%m-%d %H:%M:%S", gmtime())
-
-def unix_para_datetime(tempo_unix):
-    return datetime.datetime.fromtimestamp(int(tempo_unix)).strftime("%Y-%m-%d %H:%M:%S")
-
 class Passageiro:
 
     name = ""
-
+    """ bag_pass : número de bagagens do passageiro """
+    """ ciclo_in : instante em que foi colocado na fila (número do ciclo da simulação) """
     def __init__(self, bag_pass, ciclo_in):
         self.__bag_pass = bag_pass
         self.__ciclo_in = ciclo_in
@@ -31,29 +25,35 @@ class Passageiro:
 
 class Balcao:
 
-    def __init__(self, n_balcao):
+    def __init__(self, n_balcao, num_bag):
         self.__n_balcao = n_balcao
         self.__fila = Queue()
         self.__inic_atend = 0
         self.__passt_atend = 0
         self.__numt_bag = 0
         self.__tempt_esp = 0
-        self.__bag_utemp = 0
-        #self.__bag_utemp = randint(1, int(passageiro.obtem_bag_pass()))
+        self.__bag_utemp = randint(1 ,int(num_bag))
+
+    def muda_inic_atend2(self):
+        passageiro_em_atendimento = self.obtem_fila().enqueue(self)
+        self.__inic_atend += passageiro_em_atendimento.obtem_ciclo_in()
 
     def muda_inic_atend(self):
-        passageiro_em_atendimento = self.obtem_fila().pop()
-        self.__inic_atend = passageiro_em_atendimento.obtem_ciclo_in()
+        passageiro_em_atendimento = self.obtem_fila().dequeue()
+        self.__inic_atend += passageiro_em_atendimento.obtem_ciclo_in()
         self.incr_passt_atend()
         self.muda_numt_bag(passageiro_em_atendimento.obtem_bag_pass())
         self.muda_tempt_esp(passageiro_em_atendimento)
-        self.__bag_utemp = self.obtem_numt_bag() / self.obtem_tempt_esp()
+        if self.obtem_temp_esp() > 0:
+            self.__bag_utemp = self.obtem_numt_bag() / self.obtem_temp_esp()
 
     def __str__(self):
-        return "Balcão " + str(self.obtem_numt_bag()) + " tempo " + str(self.obtem_inic_atend()) + " : " + " - "
-        #print("Tempo Atual: " + str(int(tempo_atual())))
-        #print("Ciclo in passageiro: " + str(int(passageiro.ciclo_in())))
-        #print("Tempo atual - tempo do passageiro: " + str(int(tempo_atual() - passageiro.ciclo_in())))
+        if not self.obtem_fila().isEmpty():
+            lista_aux = self.obtem_fila()
+            passageiro = lista_aux.dequeue()
+            return "Balcão " + str(self.obtem_n_balcao()) + " tempo " + str(passageiro.obtem_ciclo_in()) + " : " + " - " + lista_aux.size()*str(passageiro) + " - "
+        else:
+            return "Balcão " + str(self.obtem_n_balcao()) + " tempo " + str(self.obtem_inic_atend()) + " : " + " - "
 
     def incr_passt_atend(self):
         self.__passt_atend += 1
@@ -62,7 +62,7 @@ class Balcao:
         self.__numt_bag += bag_passageiro
 
     def muda_tempt_esp(self, passageiro):
-        self.__tempt_esp += (tempo_atual() - passageiro.obtem_ciclo_in())
+        self.__tempt_esp += passageiro.obtem_ciclo_in()
 
     def obtem_n_balcao(self):
         return self.__n_balcao
@@ -85,85 +85,148 @@ class Balcao:
     def obtem_bag_utemp(self):
         return self.__bag_utemp
 
-def atende_passageiros(i, balcoes, num_balcoes, ciclos):
+def atende_passageiros(i, balcoes):
+    global num_pass, num_bag, num_balcoes, ciclos, n_p_atend, fila_de_espera
+    # for balcao in balcoes:
+    #     if balcao.obtem_fila().size() > 0:
+    #         if balcao.obtem_fila().dequeue().obtem_bag_pass()
     lista_aux = []
-    ciclos = int(ciclos)
-    if i < int(ciclos/3):
-        for balcao in balcoes:
-            lista_aux.append(balcao.obtem_fila().size())
-        balcoes[lista_aux.index(min(lista_aux))].obtem_fila().enqueue((Passageiro(num_balcoes, tempo_atual() )))
-    elif i >= int(ciclos/3) and i < int(2*ciclos/3):
-        percetagem = randint(1, 100)
-        if percetagem <= 80:
-            balcoes[lista_aux.index(min(lista_aux))].obtem_fila().enqueue((Passageiro(num_balcoes, tempo_atual() )))
-    else:
-        percetagem = randint(1, 100)
-        if percetagem <= 60:
-            balcoes[lista_aux.index(min(lista_aux))].obtem_fila().enqueue((Passageiro(num_balcoes, tempo_atual() )))
-    mostra_balcoes(balcoes)
-
+    for balcao in balcoes:
+        lista_aux.append(balcao.obtem_fila().size())
+    #for i in range(n_p_atend):
+    if fila_de_espera > 0:
+        index_balcao_menor_fila = lista_aux.index(min(lista_aux))
+        if not balcoes[index_balcao_menor_fila].obtem_fila().isEmpty():
+            balcoes[index_balcao_menor_fila].muda_inic_atend()
+        if i < ciclos/3 :
+            balcoes[index_balcao_menor_fila].obtem_fila().enqueue((Passageiro(randint(1,num_bag), i )))
+            fila_de_espera -= 1
+        elif i >= ciclos/3 and i < 2*ciclos/3:
+            percetagem = randint(1, 100)
+            if percetagem <= 80:
+                balcoes[index_balcao_menor_fila].obtem_fila().enqueue((Passageiro(randint(1,num_bag), i )))
+                fila_de_espera -= 1
+        else:
+            percetagem = randint(1, 100)
+            if percetagem <= 60:
+                balcoes[index_balcao_menor_fila].obtem_fila().enqueue((Passageiro(randint(1,num_bag), i )))
+                fila_de_espera -= 1
+        mostra_balcoes(balcoes)
+    #for i in range(len(balcoes)):
+    #    balcoes[i].muda_inic_atend()
 def mostra_balcoes(balcoes):
     for balcao in balcoes:
         print(balcao)
 
-def simpar_simula(num_pass, num_bag, num_balcoes, ciclos):
+def apresenta_resultados(balcoes):
+    for balcao in balcoes:
+        if balcao.obtem_passt_atend() > 0:
+            print("Balcão " + balcao.obtem_n_balcao() + " despachou " + balcao.obtem_bag_utemp() + " bagagens por ciclo:")
+            media_bag_pass = balcao.obtem_numt_bag()/balcao.obtem_bag_utemp()
+            print(balcao.obtem_passt_atend() + " passageiros atendidos com média de bagagens / passageiro = " + media_bag_pass)
+            print("Tempo médio de espera = " + balcao.obtem_passt_atend())
 
-    lista_balcao = []
-    for i in range(int(num_balcoes)):
-        lista_balcao.append(Balcao( i+1 ))
+def existem_balcoes_com_fila(balcoes):
+    for balcao in balcoes:
+        if balcao.obtem_fila().size() > 0:
+            return True
+    return False
 
+def simpar_simula():
+    global num_pass, num_bag, num_balcoes, ciclos, n_p_atend, fila_de_espera
+    balcoes = []
+    for i in range(num_balcoes):
+        balcoes.append(Balcao( i+1 , num_bag ))
+
+    for i in range(n_p_atend):
+        for balcao in balcoes:
+            if num_pass > 0:
+                balcao.obtem_fila().enqueue((Passageiro(randint(1,num_bag), 1 )))
+                fila_de_espera -= 1
+
+    #while num_pass > 0:
     #Criação de passageiros
-    for i in range(1, int(ciclos) + 1):
+    for i in range(1, int(ciclos) + 1):# Atende os passageiros nos balcões
         print("««« CICLO n.º " + str(i) + " »»»")
-        atende_passageiros(i, lista_balcao, num_balcoes, ciclos)
-        #lista_passageiros.enqueue(Passageiro(randint(0,num_bag), tempo_atual()))
-        #print("Criado passageiro " + str(i+1) + "")
-        #time.sleep(randint(1,5))
-
-
-
-    #for i in range(len(lista_passageiros)):
-
-    #balcao1.fila.enqueue(lista_passageiros[i])
-
-    #while not balcao1.fila.isEmpty():
-    #    balcao1.muda_inic_atend(balcao1.fila.dequeue())
-
-    #print("Tempo total de espera do balcao: "+str(int(balcao1.obtem_temp_esp())))
-    #print("Total de bagagens despachadas pelo balcao atual é: "+ str(balcao1.obtem_numt_bag()))
-
-    #print(balcao1.obtem_numt_bag())
-    #print(balcao1.numt_bag)
-
-    #print(datetime.date(1989,12,21))
-    #print(" .. \n ..")
+        for j in range(n_p_atend):
+            atende_passageiros(i, balcoes)
+        #print("Fechou a chegada de novos passageiros")
+        #ciclos += 1
+        #while existem_balcoes_com_fila(balcoes):
+        #    print("««« CICLO n.º " + str(i) + " »»»")
+        #    atende_passageiros(i, balcoes, ciclos, num_bag)
+    #apresenta_resultados(balcoes)
+    #num_pass -= 1
+    #apresenta_resultados(balcoes)
 
 if __name__ == '__main__' :
 
-    cont = True
-    while cont:
-        num_pass = input("Número de passageiros:")
-        if int(num_pass) > 0:
-            cont = False
+    # Principais variáveis do SIMPAR
+    num_pass = 100 # O número de passageiros com bagagem previsto para este voo
+    num_bag = 3 # O número máximo de bagagens permitido por passageiro
+    num_balcoes = 4 # O número de balcões abertos para atendimento e despacho de bagagem
+    ciclos = 20 # Os ciclos de tempo em que a simulação decorre
 
-    cont = True
-    while cont:
-        num_bag  = input("Número de máximo de bagagens por passageiro:")
-        if int(num_bag) > 0:
-            cont = False
+    fila_de_espera = num_pass
+    n_p_atend = 3
 
-    cont = True
-    while cont:
-        num_balcoes = input("Número de balcoes:")
-        if int(num_balcoes) > 0:
-            cont = False
+    if 4 == 5:
+        cont = True
+        while cont:
+            try:
+                num_pass = int(input("Digite o número de passageiros com bagagem previsto para este voo:"))
+                if num_pass > 0:
+                    cont = False
+                else:
+                    print("Valor precisa ser maior que zero.")
+            except:
+                print("Valor inválido.")
 
-    cont = True
-    while cont:
-        ciclos = input("Os ciclos de tempo em que a simulação ocorre:")
-        if int(ciclos) > 0:
-            cont = False
+        fila_de_espera = num_pass
+        cont = True
+        while cont:
+            try:
+                num_bag  = int(input("Digite o número máximo de bagagens permitido por passageiro:"))
+                if num_bag > 0:
+                    cont = False
+                else:
+                    print("Valor precisa ser maior que zero.")
+            except:
+                print("Valor inválido.")
 
-    simpar_simula(num_pass, num_bag, num_balcoes, ciclos)
+        cont = True
+        while cont:
+            try:
+                num_balcoes = int(input("Digite o número de balcões abertos para atendimento e despacho de bagagem:"))
+                if num_balcoes > 0:
+                    cont = False
+                else:
+                    print("Valor precisa ser maior que zero.")
+            except:
+                print("Valor inválido.")
+
+        cont = True
+        while cont:
+            try:
+                ciclos = int(input("Digite os ciclos de tempo em que a simulação decorre:"))
+                if ciclos > 0:
+                    cont = False
+                else:
+                    print("Valor precisa ser maior que zero.")
+            except:
+                print("Valor inválido.")
+
+        cont = True
+        while cont:
+            try:
+                n_p_atend = int(input("Digite o total de passageiros atendidos por ciclos:"))
+                if ciclos > 0:
+                    cont = False
+                else:
+                    print("Valor precisa ser maior que zero.")
+            except:
+                print("Valor inválido.")
+
+    simpar_simula()
 
 
