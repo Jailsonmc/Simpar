@@ -1,8 +1,8 @@
 import pytz
 from time import gmtime, strftime
 import datetime
-from pythonds.basic import Queue
 import time
+from pythonds.basic import Queue
 from random import  randint
 
 class Passageiro:
@@ -38,14 +38,8 @@ class Balcao:
         passageiro_em_atendimento = self.obtem_fila().enqueue(self)
         self.__inic_atend += passageiro_em_atendimento.obtem_ciclo_in()
 
-    def muda_inic_atend(self):
-        passageiro_em_atendimento = self.obtem_fila().dequeue()
+    def muda_inic_atend(self,passageiro_em_atendimento):
         self.__inic_atend += passageiro_em_atendimento.obtem_ciclo_in()
-        self.incr_passt_atend()
-        self.muda_numt_bag(passageiro_em_atendimento.obtem_bag_pass())
-        self.muda_tempt_esp(passageiro_em_atendimento)
-        if self.obtem_temp_esp() > 0:
-            self.__bag_utemp = self.obtem_numt_bag() / self.obtem_temp_esp()
 
     def __str__(self):
         if not self.obtem_fila().isEmpty():
@@ -95,8 +89,18 @@ def atende_passageiros(i, balcoes):
     #for i in range(n_p_atend):
     if fila_de_espera > 0:
         index_balcao_menor_fila = lista_aux.index(min(lista_aux))
+
+        #despacha passageiro
         if not balcoes[index_balcao_menor_fila].obtem_fila().isEmpty():
-            balcoes[index_balcao_menor_fila].muda_inic_atend()
+            passageiro_em_atendimento = balcoes[index_balcao_menor_fila].obtem_fila().dequeue()
+            balcoes[index_balcao_menor_fila].muda_inic_atend(passageiro_em_atendimento)
+            balcoes[index_balcao_menor_fila].incr_passt_atend()
+            balcoes[index_balcao_menor_fila].muda_numt_bag(passageiro_em_atendimento.obtem_bag_pass())
+            balcoes[index_balcao_menor_fila].muda_tempt_esp(passageiro_em_atendimento)
+            if balcoes[index_balcao_menor_fila].obtem_temp_esp() > 0:
+                balcoes[index_balcao_menor_fila].__bag_utemp = balcoes[index_balcao_menor_fila].obtem_numt_bag() / balcoes[index_balcao_menor_fila].obtem_temp_esp()
+
+        #recebe passageiro
         if i < ciclos/3 :
             balcoes[index_balcao_menor_fila].obtem_fila().enqueue((Passageiro(randint(1,num_bag), i )))
             fila_de_espera -= 1
@@ -110,9 +114,11 @@ def atende_passageiros(i, balcoes):
             if percetagem <= 60:
                 balcoes[index_balcao_menor_fila].obtem_fila().enqueue((Passageiro(randint(1,num_bag), i )))
                 fila_de_espera -= 1
+
         mostra_balcoes(balcoes)
     #for i in range(len(balcoes)):
     #    balcoes[i].muda_inic_atend()
+
 def mostra_balcoes(balcoes):
     for balcao in balcoes:
         print(balcao)
